@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLOW STATION | Luxury Beauty</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root { --brand-black: #1a1a1a; }
+        body { background-color: #ffffff; font-family: 'Inter', sans-serif; }
+        .nav-luxury { border-bottom: 1px solid #eee; padding: 15px 0; background: white; position: sticky; top: 0; z-index: 1050; }
+        .logo { cursor: pointer; font-size: 1.5rem; font-weight: bold; letter-spacing: 1px; }
+        .icon-container { position: relative; cursor: pointer; margin-left: 20px; }
+        .icon-badge { position: absolute; top: -8px; right: -12px; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: white; }
+        .page-section { display: none; padding: 40px 0; }
+        .active-page { display: block; }
+        .product-card { border: none; cursor: pointer; transition: transform 0.2s ease; position: relative; }
+        .product-card:hover { transform: translateY(-5px); }
+        .product-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; background: #f9f9f9; border-radius: 4px; }
+        .btn-luxury { background: black; color: white; border-radius: 0; padding: 12px; font-weight: 600; width: 100%; border: none; }
+        .btn-outline-luxury { background: white; color: black; border: 1px solid black; border-radius: 0; padding: 12px; font-weight: 600; width: 100%; }
+        .back-nav { cursor: pointer; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .status-badge { font-size: 0.75rem; padding: 4px 8px; background: #e9ecef; border-radius: 20px; }
+    </style>
+</head>
+<body>
+
+<nav class="nav-luxury">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div class="logo" onclick="showPage('homePage')">GLOW<b>STATION</b></div>
+        <div class="d-flex align-items-center">
+            <div class="icon-container" onclick="showPage('wishlistPage')"><i class="bi bi-heart h4"></i><span class="icon-badge bg-dark" id="wishCount">0</span></div>
+            <div class="icon-container" onclick="showPage('bagPage')"><i class="bi bi-bag h4"></i><span class="icon-badge bg-danger" id="bagCount">0</span></div>
+            <div class="icon-container" onclick="showPage('ordersPage')"><i class="bi bi-truck h4"></i></div>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div id="homePage" class="page-section active-page">
+        <h4 class="fw-bold mb-4">New Arrivals</h4>
+        <div class="row row-cols-2 row-cols-md-4 g-4" id="productGrid"></div>
+    </div>
+
+    <div id="detailsPage" class="page-section">
+        <div class="back-nav" onclick="showPage('homePage')"><i class="bi bi-arrow-left"></i> Back to Store</div>
+        <div class="row mt-4" id="productDetailsContent"></div>
+    </div>
+
+    <div id="wishlistPage" class="page-section">
+        <div class="back-nav" onclick="showPage('homePage')"><i class="bi bi-arrow-left"></i> Back to Store</div>
+        <h2 class="fw-bold mb-4">Your Wishlist</h2>
+        <div id="wishlistItems" class="row row-cols-2 row-cols-md-4 g-4"></div>
+    </div>
+
+    <div id="bagPage" class="page-section">
+        <div class="back-nav" onclick="showPage('homePage')"><i class="bi bi-arrow-left"></i> Back to Store</div>
+        <h2 class="fw-bold mb-4">Your Bag</h2>
+        <div class="row">
+            <div class="col-md-7" id="bagItems"></div>
+            <div class="col-md-5" id="checkoutSection" style="display:none;">
+                <div class="card p-4 border-0 bg-light">
+                    <h5 class="fw-bold mb-3">Order Summary</h5>
+                    <div class="d-flex justify-content-between mb-4"><span class="h5">Total</span><span class="h5 fw-bold" id="bagTotal"></span></div>
+                    <div id="checkoutOptions">
+                        <button class="btn btn-outline-dark w-100 rounded-0 mb-2" onclick="placeOrder('Store Pickup')">STORE PICKUP</button>
+                        <button class="btn btn-dark w-100 rounded-0" onclick="showCODForm()">CASH ON DELIVERY</button>
+                    </div>
+                    <div id="codForm" style="display:none;">
+                        <input type="text" id="custName" class="form-control mb-2 rounded-0" placeholder="Full Name">
+                        <textarea id="custAddress" class="form-control mb-3 rounded-0" placeholder="Delivery Address"></textarea>
+                        <button class="btn-luxury" onclick="placeOrder('Cash on Delivery')">PLACE ORDER</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="successPage" class="page-section text-center py-5">
+        <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+        <h2 class="fw-bold mt-4">You have placed your order!</h2>
+        <div class="d-flex gap-2 justify-content-center mt-4">
+            <button class="btn btn-outline-dark rounded-0" onclick="showPage('homePage')">Back to Store</button>
+            <button class="btn btn-dark rounded-0" onclick="showPage('ordersPage')">See My Orders</button>
+        </div>
+    </div>
+
+    <div id="ordersPage" class="page-section">
+        <div class="back-nav" onclick="showPage('homePage')"><i class="bi bi-arrow-left"></i> Back to Store</div>
+        <h2 class="fw-bold mb-4">My Orders</h2>
+        <div id="orderHistoryList"></div>
+    </div>
+</div>
+
+<script>
+    const products = [
+        { id: 1, brand: 'Rhode', name: 'Peptide Lip Treatment', price: 1150, img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXYN0jsIkcBQoArx-AF_liI0rQuz1sWF5d9Q&s', desc: 'A restorative lip treatment for naturally plump, pillowy-soft lips.' },
+        { id: 2, brand: 'Charlotte Tilbury', name: 'Airbrush Flawless Set', price: 3200, img: 'https://images.ctfassets.net/wlke2cbybljx/uLRrl0JYlU3zl1AtPl5Bo/9508b7d0073f4f9b8dbc06405b60b2d3/Airbrush-Brush-Bundle-Packshot.png?w=660&h=660&fit=fill&q=80&bg=rgb%3AF5F5F5&fm=jpg', desc: 'The ultimate bundle for a flawless, airbrushed complexion.' },
+        { id: 3, brand: 'Rare Beauty', name: 'Soft Pinch Blush', price: 1550, img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS75YX3pAMEzaIKdnV2gj-_mPyUsSdA74wK-Q&s', desc: 'A weightless liquid blush that blends beautifully for a soft flush.' },
+        { id: 4, brand: 'Dior', name: 'Lip Glow Oil', price: 2450, img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTScJEMn8INfzEKJuL47ZmXKM6lo1qNXpJ59g&s', desc: 'Nourishing glossy lip oil that protects and enhances the lips.' }
+    ];
+
+    let bag = [], wishlist = [], orders = [];
+
+    function showPage(pageId) {
+        document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active-page'));
+        document.getElementById(pageId).classList.add('active-page');
+        if(pageId === 'bagPage') renderBag();
+        if(pageId === 'wishlistPage') renderWishlist();
+        if(pageId === 'ordersPage') renderOrders();
+    }
+
+    function renderGrid() {
+        const grid = document.getElementById('productGrid');
+        grid.innerHTML = products.map(p => `
+            <div class="col">
+                <div class="product-card" onclick="viewDetails(${p.id})">
+                    <img src="${p.img}" class="product-img mb-2">
+                    <div class="small fw-bold">${p.brand}</div>
+                    <div class="small text-muted mb-1">${p.name}</div>
+                    <div class="fw-bold">₱${p.price.toLocaleString()}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function viewDetails(id) {
+        const p = products.find(x => x.id === id);
+        document.getElementById('productDetailsContent').innerHTML = `
+            <div class="col-md-6"><img src="${p.img}" class="img-fluid rounded shadow-sm"></div>
+            <div class="col-md-6">
+                <h6 class="text-uppercase fw-bold text-muted">${p.brand}</h6>
+                <h1 class="fw-bold">${p.name}</h1>
+                <h3 class="my-3">₱${p.price.toLocaleString()}</h3>
+                <p class="text-muted mb-4">${p.desc}</p>
+                <button class="btn-luxury mb-2" onclick="addToBag(${p.id})">ADD TO BAG</button>
+                <button class="btn-outline-luxury" onclick="addToWishlist(${p.id})">ADD TO WISHLIST</button>
+            </div>
+        `;
+        showPage('detailsPage');
+    }
+
+    function addToBag(id) {
+        bag.push(products.find(p => p.id === id));
+        document.getElementById('bagCount').innerText = bag.length;
+        alert("Added to bag!");
+    }
+
+    function addToWishlist(id) {
+        if(!wishlist.find(p => p.id === id)) {
+            wishlist.push(products.find(p => p.id === id));
+            document.getElementById('wishCount').innerText = wishlist.length;
+        }
+        alert("Added to wishlist!");
+    }
+
+    function renderBag() {
+        const list = document.getElementById('bagItems'), sec = document.getElementById('checkoutSection');
+        document.getElementById('checkoutOptions').style.display = 'block';
+        document.getElementById('codForm').style.display = 'none';
+        
+        if(!bag.length) { list.innerHTML = '<p>Your bag is empty.</p>'; sec.style.display = 'none'; return; }
+        sec.style.display = 'block';
+        list.innerHTML = bag.map((item, idx) => `
+            <div class="d-flex align-items-center mb-3 border-bottom pb-3">
+                <img src="${item.img}" width="80" class="me-3 rounded">
+                <div class="flex-grow-1"><div class="fw-bold">${item.name}</div><div>₱${item.price.toLocaleString()}</div></div>
+                <i class="bi bi-trash" style="cursor:pointer" onclick="bag.splice(${idx}, 1); renderBag();"></i>
+            </div>
+        `).join('');
+        document.getElementById('bagTotal').innerText = `₱${bag.reduce((s, i) => s + i.price, 0).toLocaleString()}`;
+    }
+
+    function renderWishlist() {
+        const list = document.getElementById('wishlistItems');
+        list.innerHTML = wishlist.length ? wishlist.map(p => `
+            <div class="col"><div class="product-card" onclick="viewDetails(${p.id})"><img src="${p.img}" class="product-img mb-2"><div class="fw-bold">${p.brand}</div><div class="small">${p.name}</div></div></div>
+        `).join('') : '<div class="col-12"><p>Your wishlist is empty.</p></div>';
+    }
+
+    function showCODForm() {
+        document.getElementById('checkoutOptions').style.display = 'none';
+        document.getElementById('codForm').style.display = 'block';
+    }
+
+    function placeOrder(method) {
+        const newOrder = { 
+            method, 
+            total: bag.reduce((s, i) => s + i.price, 0), 
+            items: [...bag],
+            status: 'Processing'
+        };
+        orders.unshift(newOrder);
+        bag = []; document.getElementById('bagCount').innerText = 0;
+        showPage('successPage');
+    }
+
+    function renderOrders() {
+        const list = document.getElementById('orderHistoryList');
+        list.innerHTML = orders.length ? orders.map(o => `
+            <div class="card mb-4 border-0 shadow-sm p-3">
+                <div class="d-flex justify-content-between mb-3"><span class="fw-bold text-muted">${o.method}</span><span class="status-badge">${o.status}</span></div>
+                ${o.items.map(i => `
+                    <div class="d-flex align-items-center mb-2">
+                        <img src="${i.img}" width="50" class="me-2 rounded">
+                        <div class="small"><b>${i.brand}</b> ${i.name}</div>
+                    </div>
+                `).join('')}
+                <hr><div class="fw-bold">Total Paid: ₱${o.total.toLocaleString()}</div>
+            </div>
+        `).join('') : '<p class="text-center py-5">You have no orders yet.</p>';
+    }
+
+    renderGrid();
+</script>
+</body>
+</html>
